@@ -56,6 +56,11 @@
     text-align: center;
     margin: 1rem;
   }
+  .error-message {
+    color: #d1242f;
+    font-size: 16px;
+    margin-top: 0.5rem;
+  }
   @media (prefers-color-scheme: dark) {
     .login-container button,
     .logout-button {
@@ -72,6 +77,7 @@
   <h1>Tic Tac Toe</h1>
   <p>Please login to play</p>
   <input type="text" id="usernameInput" placeholder="Enter your username" />
+  <div id="errorMessage" class="error-message"></div>
   <br />
   <button id="loginButton">Login</button>
 </div>
@@ -112,6 +118,14 @@
   const loginButton = document.getElementById("loginButton");
   const logoutButton = document.getElementById("logoutButton");
   const displayUsername = document.getElementById("displayUsername");
+  const errorMessage = document.getElementById("errorMessage");
+
+  // Sanitize user input to prevent XSS
+  function sanitizeInput(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
 
   // Check if user is already logged in
   function checkLoginStatus() {
@@ -123,7 +137,7 @@
 
   // Show game and hide login
   function showGame(username) {
-    displayUsername.textContent = username;
+    displayUsername.textContent = sanitizeInput(username);
     loginContainer.classList.add("hidden");
     gameContainer.classList.remove("hidden");
   }
@@ -133,23 +147,28 @@
     loginContainer.classList.remove("hidden");
     gameContainer.classList.add("hidden");
     usernameInput.value = "";
+    errorMessage.textContent = "";
   }
 
-  // Handle login
-  loginButton.addEventListener("click", function() {
+  // Perform login
+  function performLogin() {
     const username = usernameInput.value.trim();
     if (username) {
-      sessionStorage.setItem("username", username);
+      sessionStorage.setItem("username", sanitizeInput(username));
+      errorMessage.textContent = "";
       showGame(username);
     } else {
-      alert("Please enter a username");
+      errorMessage.textContent = "Please enter a username";
     }
-  });
+  }
+
+  // Handle login button click
+  loginButton.addEventListener("click", performLogin);
 
   // Handle Enter key in username input
   usernameInput.addEventListener("keypress", function(e) {
     if (e.key === "Enter") {
-      loginButton.click();
+      performLogin();
     }
   });
 
