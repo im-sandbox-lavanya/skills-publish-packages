@@ -25,9 +25,63 @@
       color: #ccc;
     }
   }
+  .login-container {
+    text-align: center;
+    margin: 5rem auto;
+    max-width: 400px;
+  }
+  .login-container input[type="text"] {
+    padding: 0.5rem;
+    margin: 1rem;
+    width: 250px;
+  }
+  .login-container button,
+  .logout-button {
+    padding: 0.5rem 1rem;
+    font-size: 18px;
+    cursor: pointer;
+    background: #0969da;
+    color: white;
+    border: none;
+    border-radius: 6px;
+  }
+  .login-container button:hover,
+  .logout-button:hover {
+    background: #0860ca;
+  }
+  .hidden {
+    display: none;
+  }
+  .user-info {
+    text-align: center;
+    margin: 1rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    .login-container button,
+    .logout-button {
+      background: #1f6feb;
+    }
+    .login-container button:hover,
+    .logout-button:hover {
+      background: #388bfd;
+    }
+  }
 </style>
 
-<h1>Tic Tac Toe</h1>
+<div id="loginContainer" class="login-container">
+  <h1>Tic Tac Toe</h1>
+  <p>Please login to play</p>
+  <input type="text" id="usernameInput" placeholder="Enter your username" />
+  <br />
+  <button id="loginButton">Login</button>
+</div>
+
+<div id="gameContainer" class="hidden">
+  <h1>Tic Tac Toe</h1>
+  <div class="user-info">
+    <span>Welcome, <strong id="displayUsername"></strong>!</span>
+    <button class="logout-button" id="logoutButton">Logout</button>
+  </div>
 
 <table>
   <tr>
@@ -48,8 +102,68 @@
 </table>
 
 <h2 hidden>Game over</h2>
+</div>
 
 <script>
+  // Login/Logout functionality
+  const loginContainer = document.getElementById("loginContainer");
+  const gameContainer = document.getElementById("gameContainer");
+  const usernameInput = document.getElementById("usernameInput");
+  const loginButton = document.getElementById("loginButton");
+  const logoutButton = document.getElementById("logoutButton");
+  const displayUsername = document.getElementById("displayUsername");
+
+  // Check if user is already logged in
+  function checkLoginStatus() {
+    const username = sessionStorage.getItem("username");
+    if (username) {
+      showGame(username);
+    }
+  }
+
+  // Show game and hide login
+  function showGame(username) {
+    displayUsername.textContent = username;
+    loginContainer.classList.add("hidden");
+    gameContainer.classList.remove("hidden");
+  }
+
+  // Show login and hide game
+  function showLogin() {
+    loginContainer.classList.remove("hidden");
+    gameContainer.classList.add("hidden");
+    usernameInput.value = "";
+  }
+
+  // Handle login
+  loginButton.addEventListener("click", function() {
+    const username = usernameInput.value.trim();
+    if (username) {
+      sessionStorage.setItem("username", username);
+      showGame(username);
+    } else {
+      alert("Please enter a username");
+    }
+  });
+
+  // Handle Enter key in username input
+  usernameInput.addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      loginButton.click();
+    }
+  });
+
+  // Handle logout
+  logoutButton.addEventListener("click", function() {
+    sessionStorage.removeItem("username");
+    showLogin();
+    // Reset game
+    location.reload();
+  });
+
+  // Check login status on page load
+  checkLoginStatus();
+
   // Initialization
   const boxes = Array.from(document.querySelectorAll("td"));
   const inputs = Array.from(document.querySelectorAll("[type=checkbox]"));
