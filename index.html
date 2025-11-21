@@ -120,13 +120,6 @@
   const displayUsername = document.getElementById("displayUsername");
   const errorMessage = document.getElementById("errorMessage");
 
-  // Sanitize user input to prevent XSS
-  function sanitizeInput(str) {
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
   // Check if user is already logged in
   function checkLoginStatus() {
     const username = sessionStorage.getItem("username");
@@ -137,7 +130,8 @@
 
   // Show game and hide login
   function showGame(username) {
-    displayUsername.textContent = sanitizeInput(username);
+    // Sanitize when displaying to prevent XSS
+    displayUsername.textContent = username;
     loginContainer.classList.add("hidden");
     gameContainer.classList.remove("hidden");
   }
@@ -154,7 +148,8 @@
   function performLogin() {
     const username = usernameInput.value.trim();
     if (username) {
-      sessionStorage.setItem("username", sanitizeInput(username));
+      // Store raw username, sanitization happens during display
+      sessionStorage.setItem("username", username);
       errorMessage.textContent = "";
       showGame(username);
     } else {
