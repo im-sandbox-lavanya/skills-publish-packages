@@ -25,9 +25,69 @@
       color: #ccc;
     }
   }
+  .login-container {
+    text-align: center;
+    margin: 5rem auto;
+    max-width: 400px;
+  }
+  .login-container input[type="text"] {
+    padding: 0.5rem;
+    margin: 1rem;
+    width: 250px;
+  }
+  .login-container button,
+  .logout-button {
+    padding: 0.5rem 1rem;
+    font-size: 18px;
+    cursor: pointer;
+    background: #0969da;
+    color: white;
+    border: none;
+    border-radius: 6px;
+  }
+  .login-container button:hover,
+  .logout-button:hover {
+    background: #0860ca;
+  }
+  .hidden {
+    display: none;
+  }
+  .user-info {
+    text-align: center;
+    margin: 1rem;
+  }
+  .error-message {
+    color: #d1242f;
+    font-size: 16px;
+    margin-top: 0.5rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    .login-container button,
+    .logout-button {
+      background: #1f6feb;
+    }
+    .login-container button:hover,
+    .logout-button:hover {
+      background: #388bfd;
+    }
+  }
 </style>
 
-<h1>Tic Tac Toe</h1>
+<div id="loginContainer" class="login-container">
+  <h1>Tic Tac Toe</h1>
+  <p>Please login to play</p>
+  <input type="text" id="usernameInput" placeholder="Enter your username" />
+  <div id="errorMessage" class="error-message"></div>
+  <br />
+  <button id="loginButton">Login</button>
+</div>
+
+<div id="gameContainer" class="hidden">
+  <h1>Tic Tac Toe</h1>
+  <div class="user-info">
+    <span>Welcome, <strong id="displayUsername"></strong>!</span>
+    <button class="logout-button" id="logoutButton">Logout</button>
+  </div>
 
 <table>
   <tr>
@@ -48,8 +108,76 @@
 </table>
 
 <h2 hidden>Game over</h2>
+</div>
 
 <script>
+  // Login/Logout functionality
+  const loginContainer = document.getElementById("loginContainer");
+  const gameContainer = document.getElementById("gameContainer");
+  const usernameInput = document.getElementById("usernameInput");
+  const loginButton = document.getElementById("loginButton");
+  const logoutButton = document.getElementById("logoutButton");
+  const displayUsername = document.getElementById("displayUsername");
+  const errorMessage = document.getElementById("errorMessage");
+
+  // Check if user is already logged in
+  function checkLoginStatus() {
+    const username = sessionStorage.getItem("username");
+    if (username) {
+      showGame(username);
+    }
+  }
+
+  // Show game and hide login
+  function showGame(username) {
+    // Sanitize when displaying to prevent XSS
+    displayUsername.textContent = username;
+    loginContainer.classList.add("hidden");
+    gameContainer.classList.remove("hidden");
+  }
+
+  // Show login and hide game
+  function showLogin() {
+    loginContainer.classList.remove("hidden");
+    gameContainer.classList.add("hidden");
+    usernameInput.value = "";
+    errorMessage.textContent = "";
+  }
+
+  // Perform login
+  function performLogin() {
+    const username = usernameInput.value.trim();
+    if (username) {
+      // Store raw username, sanitization happens during display
+      sessionStorage.setItem("username", username);
+      errorMessage.textContent = "";
+      showGame(username);
+    } else {
+      errorMessage.textContent = "Please enter a username";
+    }
+  }
+
+  // Handle login button click
+  loginButton.addEventListener("click", performLogin);
+
+  // Handle Enter key in username input
+  usernameInput.addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+      performLogin();
+    }
+  });
+
+  // Handle logout
+  logoutButton.addEventListener("click", function() {
+    sessionStorage.removeItem("username");
+    showLogin();
+    // Reset game
+    location.reload();
+  });
+
+  // Check login status on page load
+  checkLoginStatus();
+
   // Initialization
   const boxes = Array.from(document.querySelectorAll("td"));
   const inputs = Array.from(document.querySelectorAll("[type=checkbox]"));
